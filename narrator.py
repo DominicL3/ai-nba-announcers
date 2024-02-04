@@ -4,7 +4,7 @@ from openai import OpenAI
 import base64
 import time
 import errno
-from elevenlabs import generate, play, set_api_key
+from elevenlabs import generate, set_api_key, stream
 
 # Load environment variables
 dotenv.load_dotenv()
@@ -27,17 +27,14 @@ def encode_image(image_path):
 
 
 def play_audio(text):
-    audio = generate(text, voice=os.environ.get("ELEVENLABS_VOICE_ID"))
+    audio_stream = generate(
+        text,
+        model="eleven_turbo_v2", # model for low-latency applications
+        voice=os.environ.get("ELEVENLABS_VOICE_ID"),
+        stream=True
+    )
 
-    unique_id = base64.urlsafe_b64encode(os.urandom(30)).decode("utf-8").rstrip("=")
-    dir_path = os.path.join("narration", unique_id)
-    os.makedirs(dir_path, exist_ok=True)
-    file_path = os.path.join(dir_path, "audio.wav")
-
-    with open(file_path, "wb") as f:
-        f.write(audio)
-
-    play(audio)
+    stream(audio_stream)
 
 
 def generate_new_line(base64_image):
