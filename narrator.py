@@ -1,11 +1,13 @@
 import os
+import dotenv
 from openai import OpenAI
 import base64
-import json
 import time
-import simpleaudio as sa
 import errno
-from elevenlabs import generate, play, set_api_key, voices
+from elevenlabs import generate, play, set_api_key
+
+# Load environment variables
+dotenv.load_dotenv()
 
 client = OpenAI()
 
@@ -61,13 +63,13 @@ def analyze_image(base64_image, script):
                 "role": "system",
                 "content": """
                 You are Sir David Attenborough. Narrate the picture of the human as if it is a nature documentary.
-                Make it snarky and funny. Don't repeat yourself. Make it short. If I do anything remotely interesting, make a big deal about it!
+                Make it snarky and funny. Don't repeat yourself. Keep your response under 200 characters. If I do anything remotely interesting, make a big deal about it!
                 """,
             },
         ]
         + script
         + generate_new_line(base64_image),
-        max_tokens=500,
+        max_tokens=100,
     )
     response_text = response.choices[0].message.content
     return response_text
@@ -95,7 +97,7 @@ def main():
         script = script + [{"role": "assistant", "content": analysis}]
 
         # wait for 5 seconds
-        time.sleep(5)
+        time.sleep(1)
 
 
 if __name__ == "__main__":
